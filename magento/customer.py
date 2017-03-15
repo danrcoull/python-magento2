@@ -34,7 +34,10 @@ class Customer(API):
             Example: `{'firstname':{'ilike':'sharoon'}}`
         :return: List of dictionaries of matching records
         """
-        return self.call('customer.list', filters and [filters] or [{}])
+        return self.get('customers',
+                        {
+                            'filters': filters
+                        })
 
     def create(self, data):
         """
@@ -43,7 +46,11 @@ class Customer(API):
         :param data: Dictionary of values
         :return: Integer ID of new record
         """
-        return int(self.call('customer.create', [data]))
+        return int(self.post('customers',
+                             {
+                                 'data': data
+                             })
+                   )
 
     def info(self, id, attributes=None):
         """
@@ -53,9 +60,10 @@ class Customer(API):
         :param attributes: `List` of attributes needed
         """
         if attributes:
-            return self.call('customer.info', [id, attributes])
-        else:
-            return self.call('customer.info', [id])
+            return self.get('customers/%s' % (id,), {
+                'attributes': attributes
+            }
+                            )
 
     def update(self, id, data):
         """
@@ -65,7 +73,10 @@ class Customer(API):
         :param data: Dictionary of values
         :return: Boolean
         """
-        return self.call('customer.update', [id, data])
+        return self.put('customers/%s' % (id,), {
+            'data': data
+        }
+                        )
 
     def delete(self, id):
         """
@@ -74,7 +85,7 @@ class Customer(API):
         :param id: ID of customer to delete
         :return: Boolean
         """
-        return self.call('customer.delete', [id])
+        return self.delete('customers/%s' % (id,))
 
 
 class CustomerGroup(API):
@@ -89,7 +100,7 @@ class CustomerGroup(API):
 
         :return: List of dictionaries of matching records
         """
-        return self.call('customer_group.list', [])
+        return self.get('customerGroups')
 
 
 class CustomerAddress(API):
@@ -105,7 +116,7 @@ class CustomerAddress(API):
         :param customer_id: ID of customer whose address needs to be fetched
         :return: List of dictionaries of matching records
         """
-        return self.call('customer_address.list', [customer_id])
+        return self.get('customers/addresses/%s' % (customer_id,))
 
     def create(self, customer_id, data):
         """
@@ -115,7 +126,11 @@ class CustomerAddress(API):
         :param data: Dictionary of values (country, zip, city, etc...)
         :return: Integer ID of new record
         """
-        return int(self.call('customer_address.create', [customer_id, data]))
+        return int(self.post('customers',
+                             {
+                                 'data': data
+                             })
+                   )
 
     def info(self, id):
         """
@@ -123,7 +138,7 @@ class CustomerAddress(API):
 
         :param id: ID of customer
         """
-        return self.call('customer_address.info', [id])
+        return self.get('customers/addresses/%s' % (id,))
 
     def update(self, id, data):
         """
@@ -133,7 +148,7 @@ class CustomerAddress(API):
         :param data: Dictionary of values
         :return: Boolean
         """
-        return self.call('customer_address.update', [id, data])
+        return self.put('customer_address.update', [id, data])
 
     def delete(self, id):
         """
@@ -142,4 +157,4 @@ class CustomerAddress(API):
         :param id: ID of address to delete
         :return: Boolean
         """
-        return self.call('customer_address.delete', [id])
+        return self.delete('customer_address.delete', [id])

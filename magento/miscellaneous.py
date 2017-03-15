@@ -22,7 +22,7 @@ class Store(API):
         :param store_id: ID of store view
         :return: Dictionary containing information about store view
         """
-        return self.call('store.info', [store_id])
+        return self.get('store.info', [store_id])
 
     def list(self, filters=None):
         """

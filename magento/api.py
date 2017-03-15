@@ -66,7 +66,7 @@ class API(object):
 
     def __init__(self, url, username, password,
                  version='1.3.2.4', full_url=False,
-                 protocol='xmlrpc', transport=None,
+                 protocol='rest', transport=None,
                  verify_ssl=True):
         """
         This is the Base API class which other APIs have to subclass. By
@@ -162,6 +162,8 @@ class API(object):
             # Use an authentication token as the password
             self.client = rest.Client(self.url, self.password,
                                       verify_ssl=self.verify_ssl)
+            # Fetch Token
+            self.client.login(self.username, self.password)
         else:
             self.client = Client(self.url)
 
@@ -194,17 +196,45 @@ class API(object):
             self.client.service.endSession(self.session)
         self.session = None
 
-    def call(self, resource_path, arguments):
+    def get(self, resource_path, arguments):
         """
-        Proxy for SOAP call API
+        Proxy for REST call API
         """
-        if self.protocol == 'xmlrpc':
-            return self.client.call(self.session, resource_path, arguments)
-        elif self.protocol == 'rest':
-            return self.client.call(resource_path, arguments)
-        else:
-            return self.client.service.call(
-                self.session, resource_path, arguments)
+        if self.protocol != 'rest':
+            raise NotImplementedError("Currently only supports REST API")
+        return self.client.get(resource_path, arguments)
+
+    def post(self, resource_path, arguments):
+        """
+        Proxy for REST call API
+        """
+        if self.protocol != 'rest':
+            raise NotImplementedError("Currently only supports REST API")
+        return self.client.post(resource_path, arguments)
+
+    def put(self, resource_path, arguments):
+        """
+        Proxy for REST call API
+        """
+        if self.protocol != 'rest':
+            raise NotImplementedError("Currently only supports REST API")
+        return self.client.put(resource_path, arguments)
+
+    def delete(self, resource_path, arguments):
+        """
+        Proxy for REST call API
+        """
+        if self.protocol != 'rest':
+            raise NotImplementedError("Currently only supports REST API")
+        return self.client.delete(resource_path, arguments)
+
+    def patch(self, resource_path, arguments):
+        """
+        Proxy for REST call API
+        """
+        if self.protocol != 'rest':
+            raise NotImplementedError("Currently only supports REST API")
+        return self.client.patch(resource_path, arguments)
 
     def multiCall(self, calls):
         """

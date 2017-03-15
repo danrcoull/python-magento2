@@ -2,7 +2,7 @@
 '''
     magento.catalog
 
-    Product Catalog API for magento
+    Product Catalog API for magento see: https://devdocs.magento.com/guides/v2.1/rest/list.html#catalog
 
     :license: BSD, see LICENSE for more details
 '''
@@ -60,8 +60,11 @@ class Category(API):
         :param attributes: Return the fields specified
         :return: Dictionary of data
         """
-        return self.call(
-            'catalog_category.info', [category_id, store_view, attributes]
+        return self.get(
+            'categories/%s' % (category_id,),
+            {
+                'storeId': store_view
+            }
         )
 
     def create(self, parent_id, data, store_view=None):
@@ -73,9 +76,14 @@ class Category(API):
         :param store_view: Store view ID or Code
         :return: Integer ID
         """
-        return int(self.call(
-            'catalog_category.create', [parent_id, data, store_view])
-        )
+        return int(self.post(
+            'categories',
+            {
+                'parent_id': parent_id,
+                'data': data,
+                'storeId': store_view
+            }
+        ))
 
     def update(self, category_id, data, store_view=None):
         """
@@ -86,11 +94,13 @@ class Category(API):
         :param store_view: Store view ID or code
         :return: Boolean
         """
-        return bool(
-            self.call(
-                'catalog_category.update', [category_id, data, store_view]
-            )
-        )
+        return bool(self.put(
+            'categories/%s' % (category_id,),
+            {
+                'data': data,
+                'storeId': store_view
+            }
+        ))
 
     def move(self, category_id, parent_id, after_id=None):
         """
@@ -112,7 +122,7 @@ class Category(API):
         :param category_id: ID of category
         :return: Boolean
         """
-        return bool(self.call('catalog_category.delete', [category_id]))
+        return bool(self.delete('categories/%s' % (category_id,)))
 
     def assignedproducts(self, category_id, store):
         """
@@ -202,7 +212,7 @@ class CategoryAttribute(API):
         """
         Retrieve Category attrbutes
         """
-        return self.call('category_attribute.list', [])
+        return self.get('products/attributes', [])
 
     def options(self, attribute_id, store_view=None):
         """
@@ -213,9 +223,7 @@ class CategoryAttribute(API):
 
         :return: list of dictionary
         """
-        return self.call(
-            'category_attribute.options', [attribute_id, store_view]
-        )
+        return self.get('products/attributes/%s' % (attribute_id,))
 
 
 class Product(API):
@@ -248,10 +256,15 @@ class Product(API):
         :param store_view: Code or ID of store view
         :return: `list` of `dict`
         """
-        return self.call('catalog_product.list', [filters, store_view])
+        return self.get(
+            'products',
+            {
+                'filters': filters,
+                'storeId': store_view
+            }
+        )
 
-    def info(self, product, store_view=None, attributes=None,
-             identifierType=None):
+    def info(self, product, store_view=None):
         """
         Retrieve product data
 
@@ -263,10 +276,11 @@ class Product(API):
 
         :return: `dict` of values
         """
-        return self.call(
-            'catalog_product.info', [
-                product, store_view, attributes, identifierType
-            ]
+        return self.get(
+            'products/%s' % (product,),
+            {
+                'storeId': store_view
+            }
         )
 
     def create(self, product_type, attribute_set_id, sku, data):
@@ -279,10 +293,14 @@ class Product(API):
         :param data: Dictionary of data
         :return: INT id of product created
         """
-        return int(self.call(
-            'catalog_product.create',
-            [product_type, attribute_set_id, sku, data]
-            )
+        return int(self.post(
+            'products',
+            {
+                'data': data,
+                'product_type': product_type,
+                'attribute_set_id': attribute_set_id,
+                'sku': sku,
+            })
         )
 
     def update(self, product, data, store_view=None, identifierType=None):
