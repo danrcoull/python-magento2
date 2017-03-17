@@ -9,7 +9,7 @@
 
 import warnings
 
-from magento.api import API
+from .api import API
 
 
 class Category(API):
@@ -212,7 +212,7 @@ class CategoryAttribute(API):
         """
         Retrieve Category attrbutes
         """
-        return self.get('products/attributes', [])
+        return self.get('categories/attributes', [])
 
     def options(self, attribute_id, store_view=None):
         """
@@ -223,7 +223,7 @@ class CategoryAttribute(API):
 
         :return: list of dictionary
         """
-        return self.get('products/attributes/%s' % (attribute_id,))
+        return self.get('categories/attributes/%s' % (attribute_id,))
 
 
 class Product(API):

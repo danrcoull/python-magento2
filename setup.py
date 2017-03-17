@@ -9,18 +9,18 @@
 import os
 from setuptools import setup
 
-exec(open(os.path.join('magento', 'version.py')).read())
+exec(open(os.path.join('magento2', 'version.py')).read())
 
 setup(
-    name = 'magento',
+    name = 'magento2',
     version=VERSION,
     url='https://github.com/fulfilio/magento/',
     license='BSD 3-Clause',
-    author='Sharoon Thomas, Openlabs Technologies',
-    author_email='info@fulfil.io',
-    description='Magento Core API Client',
+    author='Gerhard Baumgartner, Callino',
+    author_email='gbaumgartner@callino.at',
+    description='Magento 2 Core API Client',
     long_description=open('README.rst').read(),
-    packages=['magento'],
+    packages=['magento2'],
     zip_safe=False,
     platforms='any',
     install_requires=[

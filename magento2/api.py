@@ -36,7 +36,11 @@ except ImportError:
 else:
     PROTOCOLS.append('rest')
 
-from magento.utils import expand_url, camel_2_snake
+from magento2.utils import expand_url, camel_2_snake
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class ClientApiMeta(type):
@@ -49,6 +53,7 @@ class ClientApiMeta(type):
         Klass = super(ClientApiMeta, meta).__new__(meta, name, bases, dct)
 
         if not abstract:
+            _logger.info("do add API %r", API)
             setattr(
                 API, camel_2_snake(name),
                 property(lambda self: self.get_instance_of(Klass))

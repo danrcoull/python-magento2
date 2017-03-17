@@ -44,8 +44,8 @@ class Client(object):
     def post(self, resource_path, arguments):
         url = '%s/%s' % (self._url, resource_path)
         res = requests.post(
-            url, params=arguments, verify=self._verify_ssl,
-            headers={'Authorization': 'Bearer %s' % self._token})
+            url, data=json.dumps(arguments), verify=self._verify_ssl,
+            headers={'Authorization': 'Bearer %s' % self._token, "Content-Type": "application/json"})
         res.raise_for_status()
         return res.json()
 

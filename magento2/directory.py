@@ -6,7 +6,7 @@
 
     :license: BSD, see LICENSE for more details
 '''
-from magento.api import API
+from magento2.api import API
 
 
 class Country(API):
@@ -21,7 +21,7 @@ class Country(API):
 
         :return: List of dictionaries
         """
-        return self.call('directory_country.list', [])
+        return self.get('directory/countries', [])
 
 
 class Region(API):
