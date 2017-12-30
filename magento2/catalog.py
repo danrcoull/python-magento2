@@ -232,15 +232,6 @@ class Product(API):
     """
     __slots__ = ()
 
-    def currentStore(self, store_view=None):
-        """
-        Set/Get current store view
-
-        :param store_view: Store view ID or Code
-        :return: int
-        """
-        args = [store_view] if store_view else []
-        return int(self.call('catalog_product.currentStore', args))
 
     def list(self, filters=None, store_view=None):
         """
@@ -337,23 +328,11 @@ class Product(API):
         return self.delete(
             'products/%s' % sku, {}
         )
-
-
 class ProductAttribute(API):
     """
     Product Attribute API
     """
     __slots__ = ()
-
-    def currentStore(self, store_view=None):
-        """
-        Set/Get current store view
-
-        :param store_view: Store view ID or Code
-        :return: int
-        """
-        args = [store_view] if store_view else []
-        return int(self.call('catalog_product_attribute.currentStore', args))
 
     def list(self, attribute_set_id):
         """
@@ -362,76 +341,93 @@ class ProductAttribute(API):
         :param attribute_set_id: ID of attribute set
         :return: `list` of `dict`
         """
-        return self.call('catalog_product_attribute.list', [attribute_set_id])
+        return self.get('products/attribute-sets/%s/attributes' % attribute_set_id, {})
 
-    def info(self, attribute):
+    def info(self, attributeCode):
         """
         Retrieve product attribute info
 
         :param attribute: ID or Code of the attribute
         :return: `list` of `dict`
         """
-        return self.call('catalog_product_attribute.info', [attribute])
+        return self.get('products/attributes/%s' % attributeCode)
 
-    def options(self, attribute, store_view=None):
+    def options(self, attribute):
         """
         Retrieve product attribute options
 
-        :param attribute: ID or Code of the attribute
+        :param attribute: Code of the attribute
         :return: `list` of `dict`
         """
-        return self.call('catalog_product_attribute.options',
-                [attribute, store_view])
+        return self.get('products/attributes/%s/options' % attribute)
 
-    def addOption(self, attribute, data):
+    def addOption(self, attribute, label,value, data):
         """
         Create new options to attribute (Magento > 1.7.0)
 
-        :param attribute: ID or Code of the attribute.
+        :param attribute: Code of the attribute.
         :param data: Dictionary of Data.
-            {'label':[{'store_id':[0,1], 'value':'Value'},], 'order':1, 'is_default':1}
         :return: True if created.
         """
-        return bool(self.call('product_attribute.addOption',
-            [attribute, data]))
+        return self.post('products/attributes/%s/options' % attribute, {
+            'option': {
+                'label': label,
+                'value': value,
+            }.update(data)
+        })
 
-    def createOption(self, *a, **kw):
-        warnings.warn(
-        "ProductAttribute: createOption is deprecated, use addOption instead."
-        )
-        return self.addOption(*a, **kw)
 
-    def removeOption(self, attribute, option):
+    def removeOption(self, attributeCode, optionId):
         """
         Remove option to attribute (Magento > 1.7.0)
 
-        :param attribute: ID or Code of the attribute.
-        :param option: Option ID.
+        :param attributeCode: Code of the attribute.
+        :param optionId: Option ID.
         :return: True if the option is removed.
         """
-        return bool(self.call('product_attribute.removeOption',
-            [attribute, option]))
+        return self.delete('products/attributes/%s/options/%s' % (attributeCode, optionId))
 
-    def create(self, data):
+    def create(self, attribute_code, label, frontendinput,  data):
         """
         Create attribute entity.
 
         :param data: Dictionary of entity data to create attribute with.
+        :param attribute_code: Code for new attribute.
+        :param label: Label for new attribute.
+        :param frontendinput: Frontend Input type for new attribute use getTypes for a list of available.
 
         :return: Integer ID of attribute created
         """
-        return self.call('catalog_product_attribute.create', [data])
+        return self.post('products/attributes',
+                         {
+                             'attribute': {
+                                 'attribute_code': attribute_code,
+                                 'default_frontend_label': label,
+                                 'frontend_input': frontendinput
+                             }.update(data)
+                         })
 
-    def update(self, attribute, data):
+    def update(self, attributeCode, data):
         """
         Update attribute entity data.
 
-        :param attribute: ID or Code of the attribute.
+        :param attribute:  Code of the attribute.
         :param data: Dictionary of entity data to update on attribute.
 
-        :return: Boolean
+        :return: Dictionary
         """
-        return self.call('catalog_product_attribute.update', [attribute, data])
+        return self.post('products/attributes/%s' % attributeCode,
+                         {
+                             'attribute': {
+                             }.update(data)
+                         })
+
+    def getTypes(self):
+        """
+        Get attribute frontend types.
+        :return: Dictionary
+        """
+        return self.get('products/attributes/types',{})
 
 
 class ProductAttributeSet(API):
@@ -834,7 +830,7 @@ class Inventory(API):
         :param products: list of IDs or SKUs of products
         :return: `list` of `dict`
         """
-        return self.call('cataloginventory_stock_item.list', [products])
+        return self.get('stockItems')
 
     def update(self, product, data):
         """

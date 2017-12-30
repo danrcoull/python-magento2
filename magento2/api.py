@@ -201,7 +201,7 @@ class API(object):
             self.client.service.endSession(self.session)
         self.session = None
 
-    def get(self, resource_path, arguments):
+    def get(self, resource_path, arguments={}):
         """
         Proxy for REST call API
         """
@@ -209,7 +209,7 @@ class API(object):
             raise NotImplementedError("Currently only supports REST API")
         return self.client.get(resource_path, arguments)
 
-    def post(self, resource_path, arguments):
+    def post(self, resource_path, arguments={}):
         """
         Proxy for REST call API
         """
@@ -217,7 +217,7 @@ class API(object):
             raise NotImplementedError("Currently only supports REST API")
         return self.client.post(resource_path, arguments)
 
-    def put(self, resource_path, arguments):
+    def put(self, resource_path, arguments={}):
         """
         Proxy for REST call API
         """
