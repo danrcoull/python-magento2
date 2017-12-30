@@ -38,7 +38,6 @@ class Client(object):
         res = requests.get(
             url, params=arguments, verify=self._verify_ssl,
             headers={'Authorization': 'Bearer %s' % self._token})
-        res.raise_for_status()
         return res.json()
 
     def post(self, resource_path, arguments):
@@ -46,7 +45,6 @@ class Client(object):
         res = requests.post(
             url, data=json.dumps(arguments), verify=self._verify_ssl,
             headers={'Authorization': 'Bearer %s' % self._token, "Content-Type": "application/json"})
-        res.raise_for_status()
         return res.json()
 
     def put(self, resource_path, arguments):
@@ -54,7 +52,6 @@ class Client(object):
         res = requests.put(
             url, params=arguments, verify=self._verify_ssl,
             headers={'Authorization': 'Bearer %s' % self._token})
-        res.raise_for_status()
         return res.json()
 
     def delete(self, resource_path, arguments):
@@ -62,7 +59,6 @@ class Client(object):
         res = requests.delete(
             url, params=arguments, verify=self._verify_ssl,
             headers={'Authorization': 'Bearer %s' % self._token})
-        res.raise_for_status()
         return res.json()
 
     def patch(self, resource_path, arguments):
@@ -70,5 +66,4 @@ class Client(object):
         res = requests.patch(
             url, params=arguments, verify=self._verify_ssl,
             headers={'Authorization': 'Bearer %s' % self._token})
-        res.raise_for_status()
         return res.json()

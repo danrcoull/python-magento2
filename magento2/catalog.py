@@ -283,7 +283,7 @@ class Product(API):
             }
         )
 
-    def create(self, product_type, attribute_set_id, sku, data):
+    def create(self, type_id, attribute_set_id, sku, data):
         """
         Create Product and return ID
 
@@ -293,17 +293,18 @@ class Product(API):
         :param data: Dictionary of data
         :return: INT id of product created
         """
-        return int(self.post(
+        return self.post(
             'products',
             {
-                'data': data,
-                'product_type': product_type,
-                'attribute_set_id': attribute_set_id,
-                'sku': sku,
-            })
+                'product': {
+                    'type_id': type_id,
+                    'attribute_set_id': attribute_set_id,
+                    'sku': sku,
+                }.update(data)
+            }
         )
 
-    def update(self, product, data, store_view=None, identifierType=None):
+    def update(self, sku, data):
         """
         Update product Information
 
@@ -315,52 +316,15 @@ class Product(API):
 
         :return: Boolean
         """
-        return bool(self.call(
-            'catalog_product.update',
-            [product, data, store_view, identifierType]
-        ))
-
-    def setSpecialPrice(self, product, special_price=None,
-                        from_date=None, to_date=None, store_view=None,
-                        identifierType=None):
-        """
-        Update product's special price
-
-        :param product: ID or SKU of product
-        :param special_price: Special Price
-        :param from_date: From date
-        :param to_date: To Date
-        :param store_view: ID or Code of Store View
-        :param identifierType: Defines whether the product or SKU value is
-                               passed in the "product" parameter.
-
-        :return: Boolean
-        """
-        return bool(self.call(
-            'catalog_product.setSpecialPrice', [
-                product, special_price, from_date, to_date, store_view,
-                identifierType
-            ]
-        ))
-
-    def getSpecialPrice(self, product, store_view=None, identifierType=None):
-        """
-        Get product special price data
-
-        :param product: ID or SKU of product
-        :param store_view: ID or Code of Store view
-        :param identifierType: Defines whether the product or SKU value is
-                               passed in the "product" parameter.
-
-        :return: Dictionary
-        """
-        return self.call(
-            'catalog_product.getSpecialPrice', [
-                product, store_view, identifierType
-            ]
+        return self.put(
+            'products/%s' % sku,
+            {
+                'product': {
+                }.update(data)
+            }
         )
 
-    def delete(self, product, identifierType=None):
+    def remove(self, sku):
         """
         Delete a product
 
@@ -370,9 +334,9 @@ class Product(API):
 
         :return: Boolean
         """
-        return bool(self.call('catalog_product.delete', [
-            product, identifierType
-        ]))
+        return self.delete(
+            'products/%s' % sku, {}
+        )
 
 
 class ProductAttribute(API):
