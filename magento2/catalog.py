@@ -25,7 +25,7 @@ class Category(API):
         :param store_view: Store view ID or Code
         :return: int
         """
-        args = [store_view] if store_view else []
+        args = [store_view] if store_view else {}
         return int(self.call('catalog_category.currentStore', args))
 
     def tree(self, parent_id=None, store_view=None):
@@ -50,6 +50,19 @@ class Category(API):
         return self.call(
             'catalog_category.level', [website, store_view, parent_category]
         )
+
+    def info_by_name(self, category_name, store_view=None,):
+        """
+                Retrieve Category details by name
+
+                :param category_name: ID of category to retrieve
+                :param store_view: Store view ID or code
+                :return: Dictionary of data
+                """
+        search = "?searchCriteria[filter_groups][0][filters][0][field]=category_name&searchCriteria[filter_groups][0][filters][0][value]=%s" \
+                 "&searchCriteria[filter_groups][0][filters][0][condition_type]=eq" % (category_name,)
+
+        return self.get('categories/list'+search, {})
 
     def info(self, category_id, store_view=None, attributes=None):
         """
@@ -308,7 +321,7 @@ class Product(API):
         :return: Boolean
         """
         return self.put(
-            'products/%s' % sku,
+            'products/%s' % (sku,),
             {
                 'product': {
                 }.update(data)
@@ -326,8 +339,9 @@ class Product(API):
         :return: Boolean
         """
         return self.delete(
-            'products/%s' % sku, {}
+            'products/%s' % (sku,), {}
         )
+
 class ProductAttribute(API):
     """
     Product Attribute API
@@ -341,7 +355,7 @@ class ProductAttribute(API):
         :param attribute_set_id: ID of attribute set
         :return: `list` of `dict`
         """
-        return self.get('products/attribute-sets/%s/attributes' % attribute_set_id, {})
+        return self.get('products/attribute-sets/%s/attributes' % (attribute_set_id,), {})
 
     def info(self, attributeCode):
         """
@@ -350,7 +364,7 @@ class ProductAttribute(API):
         :param attribute: ID or Code of the attribute
         :return: `list` of `dict`
         """
-        return self.get('products/attributes/%s' % attributeCode)
+        return self.get('products/attributes/%s' % (attributeCode,), {})
 
     def options(self, attribute):
         """
@@ -359,9 +373,9 @@ class ProductAttribute(API):
         :param attribute: Code of the attribute
         :return: `list` of `dict`
         """
-        return self.get('products/attributes/%s/options' % attribute)
+        return self.get('products/attributes/%s/options' % (attribute,), {})
 
-    def addOption(self, attribute, label,value, data):
+    def addOption(self, attribute, label, value, data):
         """
         Create new options to attribute (Magento > 1.7.0)
 
@@ -369,13 +383,12 @@ class ProductAttribute(API):
         :param data: Dictionary of Data.
         :return: True if created.
         """
-        return self.post('products/attributes/%s/options' % attribute, {
+        return self.post('products/attributes/%s/options' % (attribute,), {
             'option': {
                 'label': label,
                 'value': value,
             }.update(data)
         })
-
 
     def removeOption(self, attributeCode, optionId):
         """
@@ -385,7 +398,7 @@ class ProductAttribute(API):
         :param optionId: Option ID.
         :return: True if the option is removed.
         """
-        return self.delete('products/attributes/%s/options/%s' % (attributeCode, optionId))
+        return self.delete('products/attributes/%s/options/%s' % (attributeCode, optionId), {})
 
     def create(self, attribute_code, label, frontendinput,  data):
         """
@@ -416,7 +429,7 @@ class ProductAttribute(API):
 
         :return: Dictionary
         """
-        return self.post('products/attributes/%s' % attributeCode,
+        return self.post('products/attributes/%s' % (attributeCode,),
                          {
                              'attribute': {
                              }.update(data)
@@ -427,7 +440,50 @@ class ProductAttribute(API):
         Get attribute frontend types.
         :return: Dictionary
         """
-        return self.get('products/attributes/types',{})
+        return self.get('products/attributes/types', {})
+
+
+class ProductAttributeGroup(API):
+    """
+      Product Attribute Group API
+      """
+    __slots__ = ()
+
+    def list(self, searchString=''):
+        """
+        Retrieve list of product attribute sets
+
+        :return: `list` of `dict`
+        """
+        return self.get('products/attribute-sets/sets/list', [])
+
+    def create(self, attribute_group_name, attribute_set_id, attributes={}):
+        """
+        Create a new attribute set based on a "skeleton" attribute set.
+        If unsure, use the "Default" attribute set as a skeleton.
+
+        :param attribute_set_name: name of the new attribute set
+        :param skeleton_set_id: id of the skeleton attribute set to base this set on.
+        :param attributes: dictionary of extension attributes.
+
+        :return: Integer ID of new attribute set
+        """
+        data = {
+            "group": {
+                "attribute_group_name": attribute_group_name,
+                "attribute_set_id": attribute_set_id,
+                "extension_attributes": attributes
+            }
+        }
+        return self.post('products/attribute-sets/groups', data)
+
+    def remove(self, groupdId):
+        """
+        Retrieve list of product attribute sets
+
+        :return: `list` of `dict`
+        """
+        return self.delete('products/attribute-sets/groups/%s' % (groupdId,), {})
 
 
 class ProductAttributeSet(API):
@@ -436,27 +492,39 @@ class ProductAttributeSet(API):
     """
     __slots__ = ()
 
-    def list(self):
+    def list(self, searchString=''):
         """
         Retrieve list of product attribute sets
 
         :return: `list` of `dict`
         """
-        return self.call('catalog_product_attribute_set.list', [])
+        return self.get('products/attribute-sets/sets/list', [])
 
-    def create(self, attribute_set_name, skeleton_set_id):
+    def create(self, attribute_set_name, skeleton_set_id, attributes={}):
         """
         Create a new attribute set based on a "skeleton" attribute set.
         If unsure, use the "Default" attribute set as a skeleton.
 
         :param attribute_set_name: name of the new attribute set
         :param skeleton_set_id: id of the skeleton attribute set to base this set on.
+        :param attributes: dictionary of extension attributes.
 
         :return: Integer ID of new attribute set
         """
-        return self.call('catalog_product_attribute_set.create', [attribute_set_name, skeleton_set_id])
 
-    def attributeAdd(self, attribute_id, attribute_set_id):
+        data = {
+
+            "attributeSet": {
+                "attribute_set_name": attribute_set_name,
+                "sort_order": 0,
+                "entity_type_id": 0,
+                "extension_attributes": attributes
+            },
+            "skeletonId": skeleton_set_id
+        }
+        return self.post('products/attribute-sets', data)
+
+    def attributeAdd(self, attribute_set_id, group_id, code):
         """
         Add an existing attribute to an attribute set.
 
@@ -465,9 +533,15 @@ class ProductAttributeSet(API):
 
         :return: Boolean
         """
-        return self.call('catalog_product_attribute_set.attributeAdd', [attribute_id, attribute_set_id])
 
-    def attributeRemove(self, attribute_id, attribute_set_id):
+        data = {
+            "attributeSetId": attribute_set_id,
+            "attributeGroupId": group_id,
+            "attributeCode": code,
+        }
+        return self.post('products/attribute-sets/attributes', data)
+
+    def attributeRemove(self, atribute_code, attribute_set_id):
         """
         Remove an existing attribute to an attribute set.
 
@@ -476,7 +550,7 @@ class ProductAttributeSet(API):
 
         :return: Boolean
         """
-        return self.call('catalog_product_attribute_set.attributeRemove', [attribute_id, attribute_set_id])
+        return self.delete('products/attribute-sets/%s/attributes/%s' % (attribute_set_id, atribute_code,), {})
 
 
 
@@ -492,7 +566,7 @@ class ProductTypes(API):
 
         :return: `list` of `dict`
         """
-        return self.call('catalog_product_type.list', [])
+        return self.get('products/types', {})
 
 
 class ProductImages(API):

@@ -225,13 +225,13 @@ class API(object):
             raise NotImplementedError("Currently only supports REST API")
         return self.client.put(resource_path, arguments)
 
-    def delete(self, resource_path, arguments):
+    def delete(self, resource_path, arguments={}):
         """
         Proxy for REST call API
         """
         if self.protocol != 'rest':
             raise NotImplementedError("Currently only supports REST API")
-        return self.client.delete(resource_path, arguments)
+        return self.client.delete(resource_path, arguments={})
 
     def patch(self, resource_path, arguments):
         """
@@ -239,7 +239,7 @@ class API(object):
         """
         if self.protocol != 'rest':
             raise NotImplementedError("Currently only supports REST API")
-        return self.client.patch(resource_path, arguments)
+        return self.client.patch(resource_path, arguments={})
 
     def multiCall(self, calls):
         """

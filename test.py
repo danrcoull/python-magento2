@@ -1,4 +1,6 @@
-import magento2
+import sys
+from magento2dev import magento2
+
 import logging
 
 _logger = logging.getLogger(__name__)
