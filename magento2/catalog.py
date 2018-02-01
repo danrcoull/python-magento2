@@ -10,7 +10,7 @@
 import warnings
 
 from .api import API
-
+import logging
 
 class Category(API):
     """
@@ -28,7 +28,7 @@ class Category(API):
         args = [store_view] if store_view else {}
         return int(self.call('catalog_category.currentStore', args))
 
-    def tree(self, parent_id=None, store_view=None):
+    def tree(self, rootCatId=2, store_view=1):
         """
         Retrieve hierarchical tree of categories.
 
@@ -36,7 +36,7 @@ class Category(API):
         :param store_view: Store View (optional)
         :return: dictionary of values
         """
-        return self.call('catalog_category.tree', [parent_id, store_view])
+        return self.get('categories?rootCategoryId=%s' % (rootCatId,), {})
 
     def level(self, website=None, store_view=None, parent_category=None):
         """
@@ -80,7 +80,7 @@ class Category(API):
             }
         )
 
-    def create(self, parent_id, data, store_view=None):
+    def create(self, parent_id, name, level=4):
         """
         Create new category and return its ID
 
@@ -89,14 +89,17 @@ class Category(API):
         :param store_view: Store view ID or Code
         :return: Integer ID
         """
-        return int(self.post(
-            'categories',
-            {
-                'parent_id': parent_id,
-                'data': data,
-                'storeId': store_view
+
+        data = {
+                'category' : {
+                    'parent_id': parent_id,
+                    'level': level,
+                    'name' : name,
+                    'is_active': True
+                }
             }
-        ))
+
+        return self.post('categories', data)
 
     def update(self, category_id, data, store_view=None):
         """
@@ -281,10 +284,7 @@ class Product(API):
         :return: `dict` of values
         """
         return self.get(
-            'products/%s' % (product,),
-            {
-                'storeId': store_view
-            }
+            'products/%s' % (product,)
         )
 
     def create(self, type_id, attribute_set_id, sku, data):
@@ -297,15 +297,19 @@ class Product(API):
         :param data: Dictionary of data
         :return: INT id of product created
         """
-        return self.post(
-            'products',
-            {
+        product = {
                 'product': {
                     'type_id': type_id,
                     'attribute_set_id': attribute_set_id,
                     'sku': sku,
-                }.update(data)
-            }
+                }
+        }
+
+        product['product'].update(data)
+
+        return self.post(
+            'products',product
+
         )
 
     def update(self, sku, data):

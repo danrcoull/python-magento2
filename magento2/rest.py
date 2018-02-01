@@ -2,13 +2,14 @@
 try:
     import requests
     import json
+    import logging
 except ImportError:
     pass
 
 
 class Client(object):
 
-    def __init__(self, url, token, verify_ssl=True):
+    def __init__(self, url, token, verify_ssl=False):
         self._url = url
         self._token = token
         self._verify_ssl = verify_ssl
@@ -31,6 +32,7 @@ class Client(object):
         # TODO: Add Error Handling here if not status=200 OK !
         token = requests.post(
             url, data=payload, verify=self._verify_ssl, headers=headers)
+
         self._token = json.loads(token.text)
 
     def get(self, resource_path, arguments):
